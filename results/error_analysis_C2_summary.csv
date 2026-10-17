@@ -1,0 +1,12 @@
+model_key,final_code,n
+A,abstained (UNVERIFIABLE),3
+A,"aggregation, arithmetic or units",5
+A,misread tool output,1
+A,possible reference-label error,1
+A,revision claim: earlier print not consulted,10
+F,abstained (UNVERIFIABLE),6
+F,"aggregation, arithmetic or units",1
+F,no verdict: tried another tool call after the 3-call budget,4
+F,precision rule applied over-strictly,3
+F,relative-period confusion,2
+F,revision claim: earlier print not consulted,4

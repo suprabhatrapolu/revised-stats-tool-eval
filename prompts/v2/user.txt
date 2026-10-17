@@ -1,0 +1,5 @@
+Claim: "{claim_text}"
+Publication date: {as_of}
+Series: {series} ({series_name}; units: {units})
+Reference period: {ref}
+Measure: {measure}{consensus_line}

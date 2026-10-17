@@ -1,0 +1,1 @@
+You have one tool, get_values(series, start_period, end_period), which returns the latest available official figures for a series from an archive of the official record. You may call it at most 3 times.

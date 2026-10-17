@@ -1,0 +1,21 @@
+hypothesis,family,metric,first,second,n_pairs,first_rate,second_rate,first_only,second_only,p_exact,diff,diff_lo,diff_hi,p_holm
+H1,primary,correct,A-C2,F-C0,331,0.646526,0.504532,104,57,0.000263477,,,,0.000263477
+H1-S (exploratory),exploratory,correct,A-C2,S-C0,331,0.646526,0.782477,46,91,0.000150419,,,,
+H2,primary,said_contra,A-C1,A-C0,332,0.662651,0.496988,106,51,1.35088e-05,,,,2.70176e-05
+H3,primary,said_contra,A-C2,A-C1,331,0.302115,0.664653,25,145,9.35643e-22,,,,3.74257e-21
+H2,secondary,said_contra,B-C1,B-C0,332,0.930723,0.460843,163,7,1.00257e-39,,,,
+H3,secondary,said_contra,B-C2,B-C1,332,0.195783,0.930723,11,255,1.68882e-61,,,,
+H2,primary,said_contra,F-C1,F-C0,332,0.590361,0.39759,101,37,4.75026e-08,,,,1.42508e-07
+H3,primary,said_contra,F-C2,F-C1,332,0.0813253,0.590361,7,176,2.0618e-43,,,,1.0309e-42
+H2,secondary,said_contra,S-C1,S-C0,332,0.168675,0.0240964,48,0,7.10543e-15,,,,
+H3,secondary,said_contra,S-C2,S-C1,332,0.0361446,0.168675,4,48,1.30653e-10,,,,
+C2 vs C0,descriptive,said_contra,A-C2,A-C0,331,0.302115,0.495468,46,110,3.15182e-07,,,,
+C2 vs C0,descriptive,said_contra,B-C2,B-C0,332,0.195783,0.460843,26,114,2.42394e-14,,,,
+C2 vs C0,descriptive,said_contra,F-C2,F-C0,332,0.0813253,0.39759,10,115,9.11799e-24,,,,
+C2 vs C0,descriptive,said_contra,S-C2,S-C0,332,0.0361446,0.0240964,9,5,0.42395,,,,
+H4,secondary,correct (HOLDOUT),A-C2,A-C0,290,0.455172,0.375862,78,55,0.0560279,0.0793103,-0.0032515,0.162284,
+H4,secondary,correct (HOLDOUT),B-C2,B-C0,291,0.618557,0.309278,114,24,3.16894e-15,0.309278,0.21124,0.381251,
+H4,secondary,correct (HOLDOUT),F-C2,F-C0,291,0.635739,0.415808,96,32,1.28418e-08,0.219931,0.130431,0.292929,
+H4,secondary,correct (HOLDOUT),S-C2,S-C0,291,0.690722,0.47079,86,22,3.98824e-10,0.219931,0.0973767,0.333333,
+"H1-S (after S cutoff, exploratory)",exploratory,correct,A-C2,S-C0,73,0.616438,0.369863,31,13,0.00955988,,,,
+"H1-S (on/before S cutoff, exploratory)",exploratory,correct,A-C2,S-C0,258,0.655039,0.899225,15,78,1.93931e-11,,,,

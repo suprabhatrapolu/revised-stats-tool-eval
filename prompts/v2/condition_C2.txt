@@ -1,0 +1,1 @@
+You have one tool, get_values(series, start_period, end_period, as_of), which returns official figures for a series exactly as they were published on the date as_of, from an archive of the official record. Set as_of to the claim's publication date. You may call it at most 3 times.
