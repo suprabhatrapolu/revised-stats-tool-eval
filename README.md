@@ -27,7 +27,7 @@ populations, not samples:
 |---|---|---|
 | FLIP | 322 | Accurate when published (by the record of that day), contradicted by today's record |
 | STABLE | 1,519 | Accurate when published and still matching today's record |
-| HOLDOUT | 291 | Every checkable claim from two held-out releases, labelled by blind adjudication; includes claims that are wrong or not checkable, so a model cannot score well by agreeing with everything |
+| HOLDOUT | 291 | Every checkable claim from two held-out releases, labelled by blind adjudication; 75 of its labels are CONTRADICTED or UNVERIFIABLE |
 
 Counts exclude 20 pilot claims that were used to tune the prompt.
 
@@ -67,6 +67,13 @@ Both tools read only a local copy of ALFRED, the St. Louis Fed's public archive 
   prompt did not ask for.
 - **Exploratory:** Claude Sonnet 5.5, whose training extends into 2026, scores 89.6% without tools on releases before
   its knowledge cutoff and 37.0% after it.
+
+- **What the study does not show.** On HOLDOUT, always answering SUPPORTED would score 74.2%, and no model reaches
+  that under any condition (best: Claude Sonnet 5.5 with the as-of tool, 69.1%). On the 75 HOLDOUT claims that are not
+  SUPPORTED, the as-of tool raises accuracy for Llama-3.1-8B (20.0% to 31.1%), barely moves gpt-oss-20b and
+  DeepSeek-V4-Pro, and lowers it for Claude Sonnet 5.5 (44.0% to 29.3%). So the as-of tool fixes the revision failure,
+  but this study does not show that it helps a model separate accurate claims from inaccurate ones. These two
+  analyses were added after peer review and are marked post-hoc (`DEVIATIONS.md`, D6).
 
 Full tables, confidence intervals and tests are in `results/` and in the paper.
 
@@ -133,8 +140,8 @@ hash(model, condition, prompt version, claim), so a rerun is never billed twice.
 
 ## What is not included, and why
 
-- **Claim texts, reference labels and per-claim model outputs.** They come from the companion study's dataset, which
-  is under review, and will be released with it. Without them, `build_sample.py` and `run.py` cannot be run end to
+- **Claim texts, reference labels and per-claim model outputs.** They come from the companion study's dataset
+  and will be released with it. Without them, `build_sample.py` and `run.py` cannot be run end to
   end; every aggregate result is here.
 - **The vintage archive itself.** It is public (ALFRED, Federal Reserve Bank of St. Louis); `data/FREEZE.md` lists the
   series and vintages used.

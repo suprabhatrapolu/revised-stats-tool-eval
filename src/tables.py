@@ -26,11 +26,12 @@ def cell(met, mk, c, sub):
     return None if r.empty else r.iloc[0]
 
 
-def main_table(met):
+def main_table(met, baseline=""):
     L = [r"\begin{table}[t]", r"\centering\footnotesize", r"\setlength{\tabcolsep}{3.5pt}",
-         r"\caption{Main results (pilot excluded; \%). FCR, UNV: share of FLIP claims (reference SUPPORTED) labelled CONTRADICTED, UNVERIFIABLE; brackets: 95\% document-bootstrap CI. \$/100: US\$ per 100 FLIP claims. --: not run; $^\dagger$: over 5\% of episodes missing.}\label{tab:main}",
+         r"\caption{Main results (pilot excluded; \%). FCR, UNV: share of FLIP claims (reference SUPPORTED) labelled CONTRADICTED, UNVERIFIABLE; brackets: 95\% CI. \$/100: US\$ per 100 FLIP claims. --: not run; $^\dagger$: over 5\% of episodes missing. First row: post-hoc baseline (D6); 100 on FLIP and STABLE by definition.}\label{tab:main}",
          r"\adjustbox{max width=\textwidth}{\begin{tabular}{llcccccc}", r"\toprule",
-         r"Model & Cond. & FLIP acc. & FLIP FCR & FLIP UNV & STABLE acc. & HOLDOUT acc. & \$/100 \\", r"\midrule"]
+         r"Model & Cond. & FLIP acc. & FLIP FCR & FLIP UNV & STABLE acc. & HOLDOUT acc. & \$/100 \\", r"\midrule",
+         r"Majority baseline & always SUPPORTED & 100 & 0 & 0 & 100 & " + baseline + r" & 0 \\", r"\midrule"]
     def v(x, k):
         if x is None: return "--"
         return p(x[k]) + (r"$^\dagger$" if x.missing > 0.05 * x.n_population else "")
@@ -108,6 +109,21 @@ def missing_table(m):
     return "\n".join(L)
 
 
+def discrim_table(ns):
+    L = [r"\begin{table}[t]", r"\centering\small",
+         r"\caption{Accuracy (\%) on the \HoldoutNonSuppN{} non-SUPPORTED HOLDOUT claims, and share of them answered SUPPORTED, without a tool (C0) and with the as-of tool (C2). Post-hoc (D6). Always answering SUPPORTED scores 0 here.}\label{tab:discrim}",
+         r"\begin{tabular}{lcccc}", r"\toprule",
+         r" & \multicolumn{2}{c}{Accuracy} & \multicolumn{2}{c}{Said SUPPORTED} \\",
+         r"Model & C0 & C2 & C0 & C2 \\",
+         r"\midrule"]
+    for mk in ORDER:
+        r0 = ns[(ns.model_key == mk) & (ns.condition == "C0")].iloc[0]
+        r = ns[(ns.model_key == mk) & (ns.condition == "C2")].iloc[0]
+        L.append(f"{NAME[mk]} & {p(r0.accuracy)} & {p(r.accuracy)} & {p(r0.said_supported)} & {p(r.said_supported)} \\\\")
+    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    return "\n".join(L)
+
+
 def error_table(ea):
     L = [r"\begin{tabular}{lrr}", r"\toprule", r"Cause (20 random C2 FLIP failures each) & Llama-3.1-8B & DeepSeek-V4-Pro \\", r"\midrule"]
     piv = ea.pivot_table(index="final_code", columns="model_key", values="n", aggfunc="sum").fillna(0).astype(int)
@@ -129,8 +145,12 @@ def trunc_table(met):
 
 def main():
     met = pd.read_csv(os.path.join(RES, "metrics.csv"))
+    # post-hoc majority baseline on the mixed HOLDOUT (D6): share of HOLDOUT labels that are SUPPORTED
+    samp = pd.read_csv(os.path.join(HERE, os.pardir, "data", "sample.csv"), dtype=str)
+    hold = samp[samp.subset == "HOLDOUT"]
+    baseline = f"{100 * (hold.reference == 'SUPPORTED').mean():.1f}"
     w = lambda n, t: open(os.path.join(OUT, n), "w", encoding="utf-8", newline="\n").write(t + "\n")
-    w("table_main.tex", main_table(met))
+    w("table_main.tex", main_table(met, baseline))
     tt = tools_table(pd.read_csv(os.path.join(RES, "tool_use.csv")), met)
     w("table_tools.tex", tt)
     w("table_tools_body.tex", tt[tt.index(r"\begin{tabular}"):tt.index(r"\end{tabular}") + len(r"\end{tabular}")])  # appendix copy
@@ -139,6 +159,7 @@ def main():
     w("table_hosts.tex", hosts_table(pd.read_csv(os.path.join(RES, "a_by_host.csv"))))
     w("table_missing.tex", missing_table(pd.read_csv(os.path.join(RES, "missing.csv"))))
     w("table_errors.tex", error_table(pd.read_csv(os.path.join(RES, "error_analysis_C2_summary.csv"))))
+    w("table_discrim.tex", discrim_table(pd.read_csv(os.path.join(RES, "holdout_nonsupported.csv"))))
     w("table_trunc.tex", trunc_table(met))
     print("tables written")
 

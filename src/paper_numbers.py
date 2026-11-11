@@ -41,6 +41,20 @@ def main():
     add("PilotN", f"{len(pilot)}", "data/pilot_ids.txt")
     add("SampleNExPilot", f"{(~s.claim_id.isin(pilot)).sum():,}", "data/sample.csv: all subsets minus data/pilot_ids.txt")
     add("HoldoutNonSuppN", f"{((s.subset == 'HOLDOUT') & (s.reference != 'SUPPORTED')).sum()}", "data/sample.csv: HOLDOUT & reference!=SUPPORTED")
+    # post-hoc (D6): per-population accuracy definitions and the majority baseline on the mixed HOLDOUT
+    add("HoldoutSuppN", f"{int(((s.subset == 'HOLDOUT') & (s.reference == 'SUPPORTED')).sum()):,}", "data/sample.csv: HOLDOUT & reference==SUPPORTED")
+    add("HoldoutNonSuppUnvN", f"{int(((s.subset == 'HOLDOUT') & (s.reference == 'UNVERIFIABLE')).sum())}", "data/sample.csv: HOLDOUT & reference==UNVERIFIABLE")
+    add("HoldoutNonSuppConN", f"{int(((s.subset == 'HOLDOUT') & (s.reference == 'CONTRADICTED')).sum())}", "data/sample.csv: HOLDOUT & reference==CONTRADICTED")
+    nh = int((s.subset == "HOLDOUT").sum())
+    hsup = int(((s.subset == "HOLDOUT") & (s.reference == "SUPPORTED")).sum())
+    add("HoldoutBaseline", f"{100 * hsup / nh:.1f}", "data/sample.csv: share of HOLDOUT labels SUPPORTED (always-SUPPORTED majority baseline)")
+    # post-hoc (D6): per-class accuracy on the non-SUPPORTED HOLDOUT claims (discrimination), from the saved analysis
+    ns = pd.read_csv(os.path.join(RES, "holdout_nonsupported.csv"))
+    for mk in ["A", "B", "F", "S"]:
+        c2 = ns[(ns.model_key == mk) & (ns.condition == "C2")].iloc[0]
+        add(f"NsAcc{W[mk]}", pct(c2.accuracy), f"results/holdout_nonsupported.csv: {mk}, C2, non-SUPPORTED HOLDOUT, accuracy")
+    s0 = ns[(ns.model_key == "S") & (ns.condition == "C0")].iloc[0]
+    add("NsZeroSO", pct(s0.accuracy), "results/holdout_nonsupported.csv: S, C0, non-SUPPORTED HOLDOUT, accuracy")
     fm = s[(s.subset == "FLIP") & ~s.claim_id.isin(pilot)]
     add("FlipRevN", f"{(fm.type == 'revision_statement').sum()}", "data/sample.csv: FLIP main, type==revision_statement")
 

@@ -178,3 +178,48 @@ Prompt v2 pilot (same 20 claims, all four models): 0 parse failures, 0 truncatio
   94–97%" became "DeepSeek and Sonnet". The error analysis is described as covering Llama and DeepSeek only. The
   duplicate-argument counts are restricted to FLIP + STABLE, to match the tool table: 3,269 calls, all identical
   duplicates; 1,262 of 1,263 on CoreWeave-only episodes and 0 of 4,160 on Groq-only.
+
+## D6. Camera-ready additions (2026-11-11; no reruns, no new model calls, no change to frozen results)
+
+All of D6 is post-hoc and is labelled post-hoc in the camera-ready. The frozen primary results (H1--H4, Table 1
+model rows, the H1 headline) are unchanged. Every number below is computed from the saved data, not copied from
+the reviews.
+
+- **D6.1 HOLDOUT majority baseline (post-hoc).** HOLDOUT labels are mixed: 216 SUPPORTED, 75 not
+  (6 CONTRADICTED, 69 UNVERIFIABLE), so a verifier that answers SUPPORTED to every claim scores 74.2% there.
+  Computed from `data/sample.csv` reference labels. Added as a clearly-labelled first row of Table 1
+  (`src/tables.py: main_table`), macro `\HoldoutBaseline` (with `\HoldoutSuppN`).
+- **D6.2 Per-class HOLDOUT accuracy (post-hoc).** C2 accuracy on only the 75 non-SUPPORTED HOLDOUT claims, from
+  `results/holdout_nonsupported.csv` (saved analysis, no rerun): A 31.1%, B 58.7%, F 41.3%, S 29.3% (S's no-tool
+  accuracy on the same 75 is 44.0%). New post-hoc appendix section "HOLDOUT baseline and per-class accuracy
+  (post-hoc)" (Appendix, `app:discrim`) with a generated table (`src/tables.py: discrim_table` →
+  `table_discrim.tex`) and a post-hoc note under the hosts appendix that B and F, on pinned hosts, reproduce the
+  same condition trends. Macros `\NsAcc{LA,GO,DS,SO}`, `\NsZeroSO`.
+- **D6.3 Camera-ready de-anonymisation and reviewer-response text changes.** Author block filled
+  (Suprabhat Rapolu, suprabhat@dirmacs.com, Dirmacs Private Limited (dirmacs.com)); `anon_url.tex` → the public
+  GitHub repo; header set to workshop-only (non-archival: no PMLR volume, no main-conference editors; status
+  "accepted at the OE-Agent workshop @ ACML 2026"); companion-study reference un-anonymised to the working paper
+  *Misinformation about economic numbers is rare; mis-verification is common* (Rapolu, 2026) matching the Zenodo
+  preprint's entry. Abstract numbers trimmed; limitations now state: the prompt pre-links series/period/measure
+  (grounded-metadata verification, not end-to-end parsing); H1--H3 are partly by construction (the as-of tool reads
+  the archive that produced the FLIP labels); the C2 prompt under-specifies revision claims ("Set as_of to the
+  publication date" makes the 82 revision claims need a second, earlier call, compounded by the 3-call budget);
+  accuracy is defined per population against its reference label. All analysis-only; no rerun, no re-scoring.
+
+- **D6.4 Final camera-ready pass (2026-11-12; text and table layout only, no reruns).**
+  - The per-class HOLDOUT table now shows C0 and C2 for all four models (accuracy and share answered SUPPORTED),
+    from `results/holdout_nonsupported.csv`. Its text states the result directly: with the as-of tool, accuracy on
+    the 75 non-SUPPORTED claims is higher for A (20.0% to 31.1%), about the same for B and F, and lower for S
+    (44.0% to 29.3%). The study does not show that the tool helps a model separate accurate from inaccurate claims.
+    New macros `\HoldoutNonSuppUnvN` (69) and `\HoldoutNonSuppConN` (6).
+  - The H4 paragraph is retitled "C2 is no less accurate than C0" (the preregistered wording) in place of "C2 is not
+    a yes-machine", and now says in the main text that no model reaches the 74.2% always-SUPPORTED baseline on
+    HOLDOUT. The H4 numbers are unchanged.
+  - Limitations as printed: (1) one setup; (2) pre-linked metadata, and labels not human-coded; (3) H1--H3 partly
+    by construction, and HOLDOUT does not show discrimination; (4) host variation and cutoff dependence. The
+    revision-claim prompt conflict stays in the Results paragraph on revision claims, not in the limitations
+    (this corrects the description in D6.3). "Human coding pending" was changed to "not human-coded".
+  - To keep the body at 4 pages: the sentence on duplicated tool-call arguments was shortened (counts remain in the
+    tool-call appendix), the Table 1 caption says "95% CI" (the bootstrap is defined in the Protocol paragraph), and
+    two sentences were tightened. No number changed.
+  - Built with tectonic 0.15 on the author's machine; `src/final_checks.py` reports the body within 4 pages.
