@@ -2,8 +2,10 @@
 
 **How tool design shapes LLM checks of claims about revised statistics.**
 
-Code, frozen protocol and aggregate results for a short paper submitted to the OE-Agent workshop at ACML 2026 (*Open
-and Efficient Agentic AI for Resource-Constrained Environments*). This copy is anonymised for double-blind review.
+By Suprabhat Rapolu (Dirmacs Private Limited, dirmacs.com).
+
+Code, frozen protocol and aggregate results for a short paper accepted at the OE-Agent workshop at ACML 2026 (*Open
+and Efficient Agentic AI for Resource-Constrained Environments*; workshop is non-archival, 1 Dec 2026, Melbourne).
 
 ---
 
