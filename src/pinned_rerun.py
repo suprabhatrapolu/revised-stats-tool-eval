@@ -32,7 +32,7 @@ def main():
             r["providers"] = "|".join(sorted(set("|".join(g.providers).split("|"))))
             rows.append(r)
     pd.DataFrame(rows).sort_values(["subset", "condition", "model_key"]).to_csv(
-        os.path.join(RES, "pinned_rerun_metrics.csv"), index=False, lineterminator="\n", float_format="%.4f")
+        os.path.join(RES, "pinned_rerun_metrics.csv"), index=False, lineterminator="\n", float_format="%.6f")
 
     both = pd.concat([ep, pp]); f = both[both.subset == "FLIP"]; hd = both[both.subset == "HOLDOUT"]
     tests = []
@@ -65,7 +65,7 @@ def main():
         x = pp[pp.condition == c].set_index("claim_id").verdict; y = ep[(ep.model_key == "A") & (ep.condition == c)].set_index("claim_id").verdict
         ids = x.index.intersection(y.index)
         agree.append({"condition": c, "n_pairs": len(ids), "same_verdict": (x[ids].fillna("-") == y[ids].fillna("-")).mean()})
-    pd.DataFrame(agree).to_csv(os.path.join(RES, "pinned_rerun_agreement.csv"), index=False, lineterminator="\n", float_format="%.4f")
+    pd.DataFrame(agree).to_csv(os.path.join(RES, "pinned_rerun_agreement.csv"), index=False, lineterminator="\n", float_format="%.6f")
     print(pd.DataFrame(agree).to_string())
     print(pd.read_csv(os.path.join(RES, "pinned_rerun_metrics.csv"))[["run", "condition", "subset", "n", "missing", "accuracy", "contradicted_rate", "unverifiable_rate", "no_verdict_rate", "malformed_call_share", "providers"]].to_string())
     print(t.to_string())

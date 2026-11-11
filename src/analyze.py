@@ -157,7 +157,7 @@ def main():
         row["providers"] = "|".join(sorted(set("|".join(g.providers).split("|"))))
         out.append(row)
     met = pd.DataFrame(out).sort_values(["subset", "model_key", "condition"])
-    met.to_csv(os.path.join(RES, "metrics.csv"), index=False, lineterminator="\n", float_format="%.4f")
+    met.to_csv(os.path.join(RES, "metrics.csv"), index=False, lineterminator="\n", float_format="%.6f")
 
     # FLIP false-contradiction by series
     f = ep[ep.subset == "FLIP"]
@@ -167,7 +167,7 @@ def main():
         lo, hi = cluster_ci(g, "said_contra", docs, w)
         bs.append({"model_key": mk, "condition": c, "series": se, "series_name": SERIES_NAME.get(se, se), "n": len(g),
                    "false_contradiction_rate": g.said_contra.mean(), "lo": lo, "hi": hi, "accuracy": g.correct.mean()})
-    pd.DataFrame(bs).to_csv(os.path.join(RES, "flip_by_series.csv"), index=False, lineterminator="\n", float_format="%.4f")
+    pd.DataFrame(bs).to_csv(os.path.join(RES, "flip_by_series.csv"), index=False, lineterminator="\n", float_format="%.6f")
 
     # paired tests on FLIP
     def vec(mk, c, col):
@@ -230,14 +230,14 @@ def main():
                    "tool_error_rate_per_call": (g.tool_errors.sum() / calls) if calls else np.nan,
                    "share_calls_malformed": (g.tool_calls_malformed.sum() / calls) if calls else np.nan,
                    "share_calls_text_format": (g.tool_calls_text_format.sum() / calls) if calls else np.nan})
-    pd.DataFrame(tu).to_csv(os.path.join(RES, "tool_use.csv"), index=False, lineterminator="\n", float_format="%.4f")
+    pd.DataFrame(tu).to_csv(os.path.join(RES, "tool_use.csv"), index=False, lineterminator="\n", float_format="%.6f")
 
     # H4 support: HOLDOUT non-SUPPORTED claims
     h = ep[(ep.subset == "HOLDOUT") & (ep.reference != "SUPPORTED")]
     if len(h):
         h.groupby(["model_key", "condition"]).agg(n=("correct", "size"), accuracy=("correct", "mean"),
                                                   said_supported=("verdict", lambda v: (v == "SUPPORTED").mean())) \
-            .reset_index().to_csv(os.path.join(RES, "holdout_nonsupported.csv"), index=False, lineterminator="\n", float_format="%.4f")
+            .reset_index().to_csv(os.path.join(RES, "holdout_nonsupported.csv"), index=False, lineterminator="\n", float_format="%.6f")
 
     # exploratory knowledge-cutoff split (DEVIATIONS D3.9); cutoffs are uncertain, no causal reading: releases on/before vs after each model's cutoff month
     CUTOFF_END = {"A": "2023-12-31", "B": "2024-06-30", "F": "2025-05-31", "S": "2026-06-30"}
@@ -251,7 +251,7 @@ def main():
                        "releases": ",".join(sorted(gg.release_date.unique())), "n": len(gg),
                        "accuracy": gg.correct.mean(), "acc_lo": lo, "acc_hi": hi,
                        "contradicted_rate": gg.said_contra.mean(), "fcr_lo": flo, "fcr_hi": fhi})
-    pd.DataFrame(cs).to_csv(os.path.join(RES, "cutoff_split.csv"), index=False, lineterminator="\n", float_format="%.4f")
+    pd.DataFrame(cs).to_csv(os.path.join(RES, "cutoff_split.csv"), index=False, lineterminator="\n", float_format="%.6f")
     # H1 restricted to releases after S's cutoff (the clean test) and on/before it
     for side, cond in [("after S cutoff", f.release_date > CUTOFF_END["S"]), ("on/before S cutoff", f.release_date <= CUTOFF_END["S"])]:
         ff = f[cond]
@@ -275,7 +275,7 @@ def main():
                    "contradicted_rate": g.said_contra.mean(), "unverifiable_rate": g.said_unver.mean()})
     hs.append({"condition": "all", "subset": "all", "host": "mixed-host episodes (excluded above)", "n": int((~a_.single_host).sum()),
                "accuracy": np.nan, "contradicted_rate": np.nan, "unverifiable_rate": np.nan})
-    pd.DataFrame(hs).to_csv(os.path.join(RES, "a_by_host.csv"), index=False, lineterminator="\n", float_format="%.4f")
+    pd.DataFrame(hs).to_csv(os.path.join(RES, "a_by_host.csv"), index=False, lineterminator="\n", float_format="%.6f")
 
     integrity(s)
     ct = []
@@ -292,7 +292,7 @@ def main():
                           "accuracy_if_2plus_vintages": multi.correct.mean() if len(multi) else np.nan,
                           "accuracy_if_1_vintage": single.correct.mean() if len(single) else np.nan})
             ct.append(r)
-    pd.DataFrame(ct).to_csv(os.path.join(RES, "flip_by_claimtype.csv"), index=False, lineterminator="\n", float_format="%.4f")
+    pd.DataFrame(ct).to_csv(os.path.join(RES, "flip_by_claimtype.csv"), index=False, lineterminator="\n", float_format="%.6f")
     met[["model_key", "model", "condition", "subset", "n_population", "n", "missing"]].to_csv(
         os.path.join(RES, "missing.csv"), index=False, lineterminator="\n")
     figure(met)

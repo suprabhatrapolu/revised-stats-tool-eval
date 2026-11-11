@@ -55,6 +55,13 @@ def main():
         add(f"NsAcc{W[mk]}", pct(c2.accuracy), f"results/holdout_nonsupported.csv: {mk}, C2, non-SUPPORTED HOLDOUT, accuracy")
     s0 = ns[(ns.model_key == "S") & (ns.condition == "C0")].iloc[0]
     add("NsZeroSO", pct(s0.accuracy), "results/holdout_nonsupported.csv: S, C0, non-SUPPORTED HOLDOUT, accuracy")
+    # October Llama episodes served only by Groq, FLIP (Appendix E), cited in the rerun paragraph
+    bh = pd.read_csv(os.path.join(RES, "a_by_host.csv"))
+    for c in ["C0", "C1"]:
+        r = bh[(bh.condition == c) & (bh.subset == "FLIP") & (bh.host == "Groq")].iloc[0]
+        src = f"results/a_by_host.csv: A, {c}, FLIP, host=Groq (episodes served only by that host)"
+        add(f"HostGroq{W[c]}Fcr", pct(r.contradicted_rate), src + ", contradicted_rate")
+        add(f"HostGroq{W[c]}N", f"{int(r.n)}", src + ", n")
     # post-hoc (D7): Llama-3.1-8B rerun on one pinned host
     pm_path = os.path.join(RES, "pinned_rerun_metrics.csv")
     if os.path.exists(pm_path):

@@ -110,8 +110,16 @@ def missing_table(m):
 
 
 def discrim_table(ns):
+    # cells with fewer episodes than claims (an episode missing after retries) are named in the caption
+    nmax = int(ns.n.max())
+    short = [r for r in ns.itertuples() if r.condition in ("C0", "C2") and r.n < nmax]
+    note = ""
+    if short:
+        cells = "; ".join(f"{NAME[r.model_key]}'s {r.condition} figures are out of {int(r.n)} "
+                          f"({nmax - int(r.n)} episode missing after retries)" for r in short)
+        note = f" {cells}; all other cells are out of {nmax}."
     L = [r"\begin{table}[!h]", r"\centering\small",
-         r"\caption{Accuracy (\%) on the \HoldoutNonSuppN{} non-SUPPORTED HOLDOUT claims, and share of them answered SUPPORTED, without a tool (C0) and with the as-of tool (C2). Post-hoc (D6). Always answering SUPPORTED scores 0 here.}\label{tab:discrim}",
+         r"\caption{Accuracy (\%) on the \HoldoutNonSuppN{} non-SUPPORTED HOLDOUT claims, and share of them answered SUPPORTED, without a tool (C0) and with the as-of tool (C2). Post-hoc (D6). Always answering SUPPORTED scores 0 here." + note + r"}\label{tab:discrim}",
          r"\begin{tabular}{lcccc}", r"\toprule",
          r" & \multicolumn{2}{c}{Accuracy} & \multicolumn{2}{c}{Said SUPPORTED} \\",
          r"Model & C0 & C2 & C0 & C2 \\",

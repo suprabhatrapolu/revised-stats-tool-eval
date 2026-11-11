@@ -274,3 +274,35 @@ replaced, re-scored or re-tested.
     headline.
   - Billed cost of the rerun: US$5.24 (API key usage), of which US$2.77 is in the completed episode files; the rest
     is the stopped Groq run and requests of episodes that failed before the D7.5 fix.
+
+## D8. Final camera-ready pass: rounding correction and text fixes (2026-11-12; no model calls, no result re-scored)
+
+- **D8.1 Rounding correction.** `src/analyze.py` and `src/pinned_rerun.py` wrote the results CSVs with 4 decimals, and
+  the paper's tables and macros then rounded those stored values to 1 decimal. That is double rounding. F-C0 on FLIP
+  is 166 of 322 = 51.5528%; it was stored as 0.5155 and printed as 51.5, where the correct value is 51.6. The CSVs
+  are now written with 6 decimals and regenerated. Every value is identical to within the old rounding (largest
+  difference 5e-5); `tests.csv`, `episodes.csv` and `integrity.csv` are byte-identical. An audit of all 99
+  accuracy, CONTRADICTED and UNVERIFIABLE cells found 4 wrong in the old output; including bootstrap interval
+  bounds, costs and other tables, 11 printed values changed, each by 0.1 (0.001 for one cost):
+  F-C0 FLIP accuracy 51.5 to 51.6 (Table 1, Results text, Appendix G); S-C0 FLIP UNVERIFIABLE 19.2 to 19.3;
+  F-C2 revision-claim accuracy 65.8 to 65.9; B-C0 FLIP CONTRADICTED interval lower bound 40.6 to 40.5; F-C1 cost per
+  100 FLIP claims 0.033 to 0.032; B-C2 FLIP accuracy interval lower bound 71.2 to 71.3 (Appendix G); A-C2 HOLDOUT
+  and STABLE no-verdict shares 3.5 to 3.4 and 1.7 to 1.6, and S-C1 FLIP accuracy excluding truncated 48.5 to 48.6
+  (Appendix C); A tool-error share 11.9 to 12.0 (Appendix D); A-C2 FLIP accuracy on CoreWeave 69.8 to 69.7
+  (Appendix E). No counts, tests or conclusions changed.
+- **D8.2 Abstract and contributions.** Restored "the open models" in the sentence about answering CONTRADICTED rather
+  than UNVERIFIABLE (it is false for Sonnet: 2.5% against 19.3%); restored the headline numbers (64.5% vs 51.4%);
+  replaced "every model ... (for Llama, not in a single-host rerun)" with "models rejected accurate claims more often
+  still, though for Llama this depended on the serving host", and the same change in the contributions.
+- **D8.3 Rerun paragraph.** Added the October Llama figures for episodes served only by Groq (FLIP: 50.6%
+  CONTRADICTED with no tool, n=81; 75.4% with C1, n=134), from `results/a_by_host.csv`, and that hosts were not
+  randomly assigned. Both were checked against the per-episode results.
+- **D8.4 Table 2 caption.** States that Llama's C2 figures are out of 74 (one episode missing after retries).
+- **D8.5 Trims to keep the body within 4 pages (wording only, no numbers):** dropped "We evaluate censuses." (the
+  contributions say it), "closed frontier" to "closed", "training cutoff" to "cutoff", "concentrate in" to "are
+  mostly", "claim's date" to "claim date", "according to" to "by", "claims from unseen releases" to
+  "unseen-release claims", and shortened the tool-output list and "stated precision" in the Conditions paragraph.
+- **D8.6 Not done.** Two limitations from the reviewed version (F's cutoff comes from third-party listings; S ran at
+  default sampling and hit the output cap in 3.4% of C1 FLIP episodes, 11 of 322) were tested and do not fit within
+  4 pages without cutting other content, so they are not restored. The facts are in the Models paragraph, Appendix B
+  and Appendix C.

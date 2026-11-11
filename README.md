@@ -52,7 +52,7 @@ Both tools read only a local copy of ALFRED, the St. Louis Fed's public archive 
 | | accuracy / false contradictions | accuracy / false contradictions | accuracy / false contradictions |
 | Llama-3.1-8B | 46.6% / 49.4% | 29.8% / 66.8% | **64.5%** / 30.2% |
 | gpt-oss-20b | 31.7% / 46.9% | 2.2% / 92.9% | **75.8%** / 19.6% |
-| DeepSeek-V4-Pro | 51.5% / 38.8% | 0.9% / 59.3% | **87.0%** / 8.1% |
+| DeepSeek-V4-Pro | 51.6% / 38.8% | 0.9% / 59.3% | **87.0%** / 8.1% |
 | Claude Sonnet 5.5 | 77.6% / 2.5% | 46.9% / 17.4% | **95.3%** / 3.7% |
 
 - **Preregistered H1 holds.** The 8B model with the as-of tool beats DeepSeek-V4-Pro without tools (64.5% vs 51.4% on
