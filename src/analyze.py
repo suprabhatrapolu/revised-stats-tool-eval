@@ -35,13 +35,13 @@ def malformed(t):
     return 0
 
 
-def load(pv, include_pilot=False):
+def load(pv, include_pilot=False, cache_dir="cache"):
     s = pd.read_csv(os.path.join(ROOT, "data", "sample.csv"), dtype=str)
     if not include_pilot:
         pilot = set(open(os.path.join(ROOT, "data", "pilot_ids.txt")).read().split())
         s = s[~s.claim_id.isin(pilot)]
     rows = []
-    for p in glob.glob(os.path.join(ROOT, "runs", "cache", "*.json")):
+    for p in glob.glob(os.path.join(ROOT, "runs", cache_dir, "*.json")):
         try:
             e = json.load(open(p, encoding="utf-8"))
         except (json.JSONDecodeError, OSError):

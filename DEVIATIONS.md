@@ -223,3 +223,54 @@ the reviews.
     tool-call appendix), the Table 1 caption says "95% CI" (the bootstrap is defined in the Protocol paragraph), and
     two sentences were tightened. No number changed.
   - Built with tectonic 0.15 on the author's machine; `src/final_checks.py` reports the body within 4 pages.
+
+## D7. Post-review robustness rerun of Llama-3.1-8B on one pinned host (2026-11-12)
+
+Reviewers noted that A (Llama-3.1-8B) was routed across hosts while B and F were pinned. This rerun is post-hoc and
+is reported as a robustness check only. The preregistered results (October episodes in `runs/cache`) are not
+replaced, re-scored or re-tested.
+
+- **D7.1 Design, fixed before any rerun call.** Model key `AP`: the same OpenRouter model
+  (`meta-llama/llama-3.1-8b-instruct`), pinned to Groq with `allow_fallbacks: false`. Same prompt v2, tool, seed
+  2027, temperature 0, 3-call limit and scoring as A. Same claims: FLIP, STABLE and HOLDOUT, conditions C0, C1, C2.
+  Pilot claims are excluded from the reported numbers as before. Groq was chosen because on 2026-11-12 only Groq and
+  CoreWeave serve this model with tool calling, and CoreWeave is the host that returned duplicated tool-call
+  arguments in October (D5.6). Groq does not publish its quantization for this model.
+- **D7.2 Harness change.** `src/run.py` gains the `AP` entry, a cache tag and a separate cache directory
+  (`runs/cache_pinned`), so October episodes are never read or overwritten by the rerun. The cut-off guard (D5.1) is
+  bypassed for this rerun with `ALLOW_AFTER_CUTOFF=1`. A new API key was used; the October key had expired.
+- **D7.3 Reporting rule, fixed before results.** The paper reports the pinned-host numbers whatever they show,
+  next to the October numbers, including H1 recomputed with AP-C2 against the October F-C0 episodes (labelled
+  post-hoc, not Holm-adjusted with the preregistered family).
+- **D7.4 Host changed from Groq to CoreWeave before any result was scored (2026-11-12).** The Groq run was stopped
+  after 55 episodes. Groq validates tool calls on its own servers and returns an error (HTTP 502, "tool call
+  validation failed" or "Failed to call a function") when the model's call does not match the schema, for example
+  `end_period: null`. With temperature 0 and a fixed seed the same call fails on every retry, so those episodes never
+  return a model answer; all six concurrent slots were blocked on six such claims. That would measure Groq's
+  validator, not the model, and the run would not have finished. No accuracy was computed on the Groq episodes; they
+  are kept in `runs/cache_pinned_groq_aborted` and are not used. `AP` is now pinned to **CoreWeave** (bf16, i.e.
+  unquantized weights; `allow_fallbacks: false`), the only other host serving this model with tool calling. CoreWeave
+  is the host that returned duplicated tool-call arguments in October (D5.6); the harness handles that the same way
+  as before (first object used). Everything else in D7.1 to D7.3 stands.
+- **D7.5 Final-answer turn on the pinned host (2026-11-12, crash fix).** After three tool calls the harness sends
+  the final turn with `tool_choice: "none"`. CoreWeave does not accept that parameter, so with strict routing
+  OpenRouter returned HTTP 404 ("no endpoints") for every episode in which the model had used all three calls: 1,127
+  of 6,456 episodes, all in C1 and C2. In October those final turns were routed to another host. For `AP` only, the
+  final turn is now sent without the tool definition, which has the same effect (the model cannot call the tool
+  again). The 5,329 episodes that had completed are unchanged; only the failed ones were run. No result had been
+  reported before this fix; the first scoring pass, which excluded the failed episodes, is discarded.
+- **D7.6 Outcome and cost (2026-11-12).** All 6,456 rerun episodes completed (6,396 after excluding pilot claims; none
+  missing). Scored by `src/pinned_rerun.py` with the same functions as `src/analyze.py`; outputs are
+  `results/pinned_rerun_metrics.csv`, `pinned_rerun_tests.csv` and `pinned_rerun_agreement.csv`.
+  - H1 with the rerun (AP-C2 vs the October F-C0): 67.4% vs 51.6%, n=322, exact McNemar p=7.1e-05 (unadjusted).
+  - H3 with the rerun: false contradictions 58.4% (C1) to 28.0% (C2), p<1e-4.
+  - H4 with the rerun: C2 minus C0 on HOLDOUT +14.8 points, 95% CI [+7.5, +21.6], p=0.0002.
+  - **H2 is not reproduced for A:** 55.9% CONTRADICTED with no tool against 58.4% with C1 (p=0.55). On this host A
+    already rejects more claims without a tool.
+  - Levels differ between runs (for example STABLE accuracy under C2: 55.0% in October, 37.4% in the rerun), and the
+    same claim gets the same verdict in 53.3% (C0), 67.0% (C1) and 69.0% (C2) of cases.
+  - The paper reports all of this in the hosts appendix and in one Results paragraph, and the abstract now says the
+    C1 result for Llama did not hold in the single-host rerun. The preregistered October results stay as the
+    headline.
+  - Billed cost of the rerun: US$5.24 (API key usage), of which US$2.77 is in the completed episode files; the rest
+    is the stopped Groq run and requests of episodes that failed before the D7.5 fix.

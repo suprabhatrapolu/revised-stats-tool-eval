@@ -1,0 +1,8 @@
+test,metric,first,second,n_pairs,first_rate,second_rate,first_only,second_only,p_exact,diff,diff_lo,diff_hi
+H1 with pinned host (post-hoc),correct,AP-C2,F-C0,322,0.673913,0.515528,106,55,7.14912e-05,0.158385,0.0857121,0.233565
+H2 with pinned host (post-hoc),said_contra,AP-C1,AP-C0,322,0.583851,0.559006,73,65,0.551413,0.0248447,-0.0493431,0.0988245
+H3 with pinned host (post-hoc),said_contra,AP-C2,AP-C1,322,0.279503,0.583851,15,113,8.93015e-20,-0.304348,-0.361027,-0.249163
+H4 with pinned host (post-hoc),correct,AP-C2,AP-C0,291,0.426117,0.278351,85,42,0.000170094,0.147766,0.0745525,0.216295
+"pinned vs October, FLIP accuracy, C0",correct,AP-C0,A-C0,322,0.329193,0.465839,39,83,8.40739e-05,-0.136646,-0.198677,-0.0709815
+"pinned vs October, FLIP accuracy, C1",correct,AP-C1,A-C1,322,0.36646,0.298137,44,22,0.00921049,0.068323,0.0196416,0.117489
+"pinned vs October, FLIP accuracy, C2",correct,AP-C2,A-C2,321,0.672897,0.64486,30,21,0.262438,0.0280374,-0.0154823,0.0723281

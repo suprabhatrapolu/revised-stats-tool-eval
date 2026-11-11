@@ -124,6 +124,22 @@ def discrim_table(ns):
     return "\n".join(L)
 
 
+def pinned_table(pm):
+    """October mixed-host A against the pinned-host rerun AP (post-hoc, D7)."""
+    L = [r"\begin{tabular}{llccccc}", r"\toprule",
+         r"Cond. & Run & FLIP acc. & FLIP FCR & STABLE acc. & HOLDOUT acc. & no verdict \\", r"\midrule"]
+    for c in ["C0", "C1", "C2"]:
+        for mk, lab in [("A", "October, mixed hosts"), ("AP", "rerun, one host")]:
+            g = pm[(pm.model_key == mk) & (pm.condition == c)].set_index("subset")
+            nv = (g.no_verdict_rate * g.n).sum() / g.n.sum()
+            L.append(f"{COND[c] if mk == 'A' else ''} & {lab} & {p(g.loc['FLIP'].accuracy)} & {p(g.loc['FLIP'].contradicted_rate)} & "
+                     f"{p(g.loc['STABLE'].accuracy)} & {p(g.loc['HOLDOUT'].accuracy)} & {p(nv)} \\\\")
+        if c != "C2": L.append(r"\midrule")
+    L += [r"\bottomrule", r"\end{tabular}"]
+    return "\n".join(L)
+
+
+
 def error_table(ea):
     L = [r"\begin{tabular}{lrr}", r"\toprule", r"Cause (20 random C2 FLIP failures each) & Llama-3.1-8B & DeepSeek-V4-Pro \\", r"\midrule"]
     piv = ea.pivot_table(index="final_code", columns="model_key", values="n", aggfunc="sum").fillna(0).astype(int)
@@ -161,6 +177,8 @@ def main():
     w("table_errors.tex", error_table(pd.read_csv(os.path.join(RES, "error_analysis_C2_summary.csv"))))
     w("table_discrim.tex", discrim_table(pd.read_csv(os.path.join(RES, "holdout_nonsupported.csv"))))
     w("table_trunc.tex", trunc_table(met))
+    if os.path.exists(os.path.join(RES, "pinned_rerun_metrics.csv")):
+        w("table_pinned.tex", pinned_table(pd.read_csv(os.path.join(RES, "pinned_rerun_metrics.csv"))))
     print("tables written")
 
 

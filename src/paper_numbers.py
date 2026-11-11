@@ -55,6 +55,30 @@ def main():
         add(f"NsAcc{W[mk]}", pct(c2.accuracy), f"results/holdout_nonsupported.csv: {mk}, C2, non-SUPPORTED HOLDOUT, accuracy")
     s0 = ns[(ns.model_key == "S") & (ns.condition == "C0")].iloc[0]
     add("NsZeroSO", pct(s0.accuracy), "results/holdout_nonsupported.csv: S, C0, non-SUPPORTED HOLDOUT, accuracy")
+    # post-hoc (D7): Llama-3.1-8B rerun on one pinned host
+    pm_path = os.path.join(RES, "pinned_rerun_metrics.csv")
+    if os.path.exists(pm_path):
+        pm = pd.read_csv(pm_path); pt = pd.read_csv(os.path.join(RES, "pinned_rerun_tests.csv"))
+        ap = pm[pm.model_key == "AP"]
+        for c in ["C0", "C1", "C2"]:
+            for sub, sn in [("FLIP", "Flip"), ("STABLE", "Stable"), ("HOLDOUT", "Holdout")]:
+                r = ap[(ap.condition == c) & (ap.subset == sub)].iloc[0]
+                src = f"results/pinned_rerun_metrics.csv: AP, {c}, {sub}"
+                add(f"PinAcc{W[c]}{sn}", pct(r.accuracy), src + ", accuracy")
+                if sub == "FLIP": add(f"PinFcr{W[c]}Flip", pct(r.contradicted_rate), src + ", contradicted_rate")
+        ag = pd.read_csv(os.path.join(RES, "pinned_rerun_agreement.csv")).set_index("condition")
+        for c in ["C0", "C1", "C2"]:
+            add(f"PinSame{W[c]}", pct(ag.loc[c, "same_verdict"]), f"results/pinned_rerun_agreement.csv: {c}, same_verdict")
+        # billed amount for the whole rerun, read from the API key's usage on 2026-11-12; it includes the stopped
+        # first-host run and the requests of episodes that failed before the D7.5 fix, which the episode files do not
+        add("PinCost", "5.24", "OpenRouter usage of the rerun's API key on 2026-11-12 (DEVIATIONS D7.6)")
+        add("PinMissing", f"{int(ap.missing.sum())}", "results/pinned_rerun_metrics.csv: AP, sum of missing")
+        add("PinEpisodes", f"{int(ap.n.sum()):,}", "results/pinned_rerun_metrics.csv: AP, sum of n")
+        for key, nm in [("H1", "PinHOne"), ("H2", "PinHTwo"), ("H3", "PinHThree"), ("H4", "PinHFour")]:
+            r = pt[pt.test.str.startswith(key + " ")].iloc[0]; src = f"results/pinned_rerun_tests.csv: {r.test}"
+            add(nm + "First", pct(r.first_rate), src + ", first_rate"); add(nm + "Second", pct(r.second_rate), src + ", second_rate")
+            add(nm + "N", f"{int(r.n_pairs)}", src + ", n_pairs"); add(nm + "P", pval(r.p_exact), src + ", p_exact (unadjusted)")
+            add(nm + "Diff", f"{100 * r['diff']:+.1f}", src + ", diff"); add(nm + "DiffCI", f"{100 * r.diff_lo:+.1f}, {100 * r.diff_hi:+.1f}", src + ", diff_lo, diff_hi")
     fm = s[(s.subset == "FLIP") & ~s.claim_id.isin(pilot)]
     add("FlipRevN", f"{(fm.type == 'revision_statement').sum()}", "data/sample.csv: FLIP main, type==revision_statement")
 

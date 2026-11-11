@@ -75,6 +75,13 @@ Both tools read only a local copy of ALFRED, the St. Louis Fed's public archive 
   but this study does not show that it helps a model separate accurate claims from inaccurate ones. These two
   analyses were added after peer review and are marked post-hoc (`DEVIATIONS.md`, D6).
 
+- **Rerun of Llama-3.1-8B on one host (added after peer review).** In the main runs Llama was routed across several
+  hosts. Rerun on one pinned host serving unquantized weights, H1 holds (67.4% vs 51.6%, unadjusted p < 0.0001) and
+  the as-of tool again cuts false contradictions (58.4% to 28.0%). One result does not hold for Llama there: the
+  latest-value tool no longer raises false contradictions (55.9% with no tool, 58.4% with the tool, p = 0.55), because
+  on that host Llama already rejects more claims without a tool. Llama's accuracy levels differ between the two runs,
+  so its point estimates depend on the serving host. See `results/pinned_rerun_*.csv` and `DEVIATIONS.md`, D7.
+
 Full tables, confidence intervals and tests are in `results/` and in the paper.
 
 ## How the study was run (and how to check it)
@@ -107,6 +114,7 @@ src/
   run.py               runs model x condition x claim episodes (caching, retries, logging, budget guard)
   analyze.py           metrics, bootstrap CIs, McNemar tests, cutoff split, host and claim-type breakdowns
   error_analysis.py    samples and tags C2 failures
+  pinned_rerun.py      scores the post-review single-host rerun of Llama-3.1-8B (model key AP)
   paper_numbers.py     writes every number used in the paper, with its source (paper/NUMBERS.md)
   tables.py            writes the paper's tables from results/
   final_checks.py      page, anonymity and placeholder checks on the PDF
@@ -120,6 +128,8 @@ results/
   flip_by_series.csv   false contradictions by statistic (payrolls, earnings, GDP)
   a_by_host.csv        Llama-3.1-8B results by serving host
   label_noise.csv, error_analysis_C2_summary.csv, holdout_nonsupported.csv, missing.csv
+  pinned_rerun_metrics.csv, pinned_rerun_tests.csv, pinned_rerun_agreement.csv
+                       the single-host rerun of Llama-3.1-8B next to the main run (post-hoc)
   sensitivity_incl_pilot/   the same metrics and tests with the pilot claims included
 paper/NUMBERS.md       each paper number -> source file and row
 ```
@@ -136,7 +146,7 @@ python src/analyze.py && python src/paper_numbers.py && python src/tables.py
 ```
 
 Model keys: A = Llama-3.1-8B, B = gpt-oss-20b, F = DeepSeek-V4-Pro, S = Claude Sonnet 5.5. Responses are cached by
-hash(model, condition, prompt version, claim), so a rerun is never billed twice. The full study cost about US$21.
+hash(model, condition, prompt version, claim), so a rerun is never billed twice. The main study cost about US$21 and the post-review rerun about US$5.
 
 ## What is not included, and why
 

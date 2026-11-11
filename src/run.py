@@ -24,6 +24,11 @@ MODELS = {
     # pinned to one host (DEVIATIONS D3.15): Darkbloom, fp8, no fallback
     "B": {"id": "openai/gpt-oss-20b", "extra": {"reasoning": {"effort": "low"}}, "max_tokens": 2500,
           "provider": {"order": ["Darkbloom"], "allow_fallbacks": False}},
+    # post-review robustness rerun (DEVIATIONS D7): the same Llama-3.1-8B pinned to one host, no fallback.
+    # Separate cache directory and cache tag, so the frozen October episodes of A are never read or overwritten.
+    "AP": {"id": "meta-llama/llama-3.1-8b-instruct", "extra": {}, "max_tokens": 1000, "conc": 12,
+           "provider": {"order": ["CoreWeave"], "allow_fallbacks": False}, "cache_tag": "pinned-coreweave", "final_without_tools": True,
+           "cache_dir": "cache_pinned"},
 }
 SEED = 2027
 MAX_TOOL_CALLS = 3
@@ -123,7 +128,8 @@ class Budget:
     def __init__(self):
         self.spent = 0.0
         # all spend counts, including superseded pilot episodes
-        for d in (CACHE, os.path.join(ROOT, "runs", "superseded_cache")):
+        for d in (CACHE, os.path.join(ROOT, "runs", "superseded_cache"), os.path.join(ROOT, "runs", "cache_pinned"),
+                  os.path.join(ROOT, "runs", "cache_pinned_groq_aborted")):
             for f in (os.listdir(d) if os.path.isdir(d) else []):
                 try: self.spent += json.load(open(os.path.join(d, f), encoding="utf-8")).get("cost", 0.0) or 0.0
                 except Exception: pass
@@ -159,8 +165,11 @@ async def post(client, key, body, log_ctx):
 
 async def episode(client, key, sem, budget, mkey, cond, row, pv):
     model = MODELS[mkey]
-    ck = hashlib.sha256(f"{model['id']}|{cond}|{pv}|{row['claim_id']}".encode()).hexdigest()
-    path = os.path.join(CACHE, ck + ".json")
+    tag = f"|{model['cache_tag']}" if model.get("cache_tag") else ""
+    ck = hashlib.sha256(f"{model['id']}|{cond}|{pv}|{row['claim_id']}{tag}".encode()).hexdigest()
+    cdir = os.path.join(ROOT, "runs", model["cache_dir"]) if model.get("cache_dir") else CACHE
+    os.makedirs(cdir, exist_ok=True)
+    path = os.path.join(cdir, ck + ".json")
     if os.path.exists(path):
         return json.load(open(path, encoding="utf-8"))
     async with sem:
@@ -180,7 +189,9 @@ async def episode(client, key, sem, budget, mkey, cond, row, pv):
             if not model.get("no_seed"):
                 body["seed"] = SEED
             body["provider"] = {"require_parameters": True, **model.get("provider", {})}
-            if tools:
+            if tools and model.get("final_without_tools") and n_tools >= MAX_TOOL_CALLS:
+                pass  # D7.5: this host does not accept tool_choice "none"; the final turn is sent without the tool instead
+            elif tools:
                 body["tools"] = tools
                 body["tool_choice"] = "auto" if n_tools < MAX_TOOL_CALLS else "none"
             ctx = {"model": model["id"], "condition": cond, "claim_id": row["claim_id"], "turn": turn, "prompt_version": pv}
