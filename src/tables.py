@@ -110,7 +110,7 @@ def missing_table(m):
 
 
 def discrim_table(ns):
-    L = [r"\begin{table}[t]", r"\centering\small",
+    L = [r"\begin{table}[!h]", r"\centering\small",
          r"\caption{Accuracy (\%) on the \HoldoutNonSuppN{} non-SUPPORTED HOLDOUT claims, and share of them answered SUPPORTED, without a tool (C0) and with the as-of tool (C2). Post-hoc (D6). Always answering SUPPORTED scores 0 here.}\label{tab:discrim}",
          r"\begin{tabular}{lcccc}", r"\toprule",
          r" & \multicolumn{2}{c}{Accuracy} & \multicolumn{2}{c}{Said SUPPORTED} \\",
